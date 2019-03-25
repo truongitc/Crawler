@@ -4,8 +4,6 @@ var http = require('http').Server(app);
 const postHttp = 4040;
 var bodyParser = require('body-parser');
 
-//var serverDB = require('./config/ConnectDB');
-
 var total_count = 0;
 var reset_time = new Date().getTime();
 
@@ -19,12 +17,6 @@ app.use(function(req,res,next){
 });
 
 app.use(function(req, res, next) {
-
-  // const queryString = 'SELECT * FROM token';
-  // serverDB.query(queryString, function (err, result) {
-  //   if (err) throw err;
-  //   console.log(result);
-  // });
 
   console.log("CALL");
 
