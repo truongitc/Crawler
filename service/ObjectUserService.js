@@ -3,37 +3,7 @@ var axios = require("axios");
 var pool = require("../config/ConnectDB");
 const ROOT_URL = "https://graph.facebook.com/";
 
-exports.getFriendListServcie = async function(req, res) {
-  try {
-    //connect db
-    var queryData = queryShowData();
-    var showData = null;
-    queryData.then(function(value) {
-      var token = value.access_token;
-      var countToken = value.count;
-      var url = ROOT_URL + req.body.userId + "/friends?limit=5000&access_token=" + token;
-
-      axios
-      .get(url)
-      .then(function(responese) {
-        delete responese.data.paging;
-        res.send(responese.data);
-      })
-      .catch(function(error) {
-        res.status(400);
-        res.send(error.responese.data);
-      });
-
-      countToken++;
-      queryUpdateData(countToken, value.id)
-    });
-  } catch (error) {
-    res.status(400);
-    res.send(error);
-  }
-};
-
-exports.getFollowersServcie = async function(req, res) {
+exports.getReactionServcie = async function(req, res) {
   try {
     //connect db
     var queryData = queryShowData();
@@ -42,9 +12,9 @@ exports.getFollowersServcie = async function(req, res) {
       var countToken = value.count;
       var url = "";
       if(req.body.hasOwnProperty("pagingToken")){
-        url = ROOT_URL + req.body.userId + "/subscribers?limit=1000&access_token=" + token+ "&pretty=1&after=" + req.body.pagingToken;
+        url = ROOT_URL + req.body.objectId + "/reactions?limit=1000&access_token=" + token+ "&pretty=1&after=" + req.body.pagingToken;
       } else{
-        url = ROOT_URL + req.body.userId + "/subscribers?limit=1000&access_token=" + token;
+        url = ROOT_URL + req.body.objectId + "/reactions?limit=1000&access_token=" + token;
       }
       axios
       .get(url)
@@ -74,7 +44,7 @@ exports.getFollowersServcie = async function(req, res) {
   }
 };
 
-exports.getAllbumsServcie = async function(req, res) {
+exports.getCommentsServcie = async function(req, res) {
   try {
     //connect db
     var queryData = queryShowData();
@@ -83,9 +53,9 @@ exports.getAllbumsServcie = async function(req, res) {
       var countToken = value.count;
       var url = "";
       if(req.body.hasOwnProperty("pagingToken")){
-        url = ROOT_URL + req.body.userId + "/albums?limit=1000&access_token=" + token+ "&pretty=1&after=" + req.body.pagingToken;
+        url = ROOT_URL + req.body.objectId + "/comments?limit=1000&access_token=" + token+ "&pretty=1&after=" + req.body.pagingToken;
       } else{
-        url = ROOT_URL + req.body.userId + "/albums?limit=1000&access_token=" + token;
+        url = ROOT_URL + req.body.objectId + "/comments?limit=1000&access_token=" + token;
       }
       axios
       .get(url)
@@ -115,7 +85,44 @@ exports.getAllbumsServcie = async function(req, res) {
   }
 };
 
-exports.getJoinedGroupsServcie = async function(req, res) {
+exports.getCommonsServcie = async function(req, res) {
+  try {
+    //connect db
+    var queryData = queryShowData();
+    queryData.then(function(value) {
+      var token = value.access_token;
+      var countToken = value.count;
+      var url = ROOT_URL + req.body.userId + "?limit=1000&access_token=" + token;
+      axios
+
+      .get(url)
+      .then(function(responese) {
+        if(responese.data.hasOwnProperty("paging")){
+          if(responese.data.paging.hasOwnProperty("next")){
+            var pagingUrl = responese.data.paging.cursors.after;
+            var data = {data: responese.data.data, paging: pagingUrl};
+            res.send(data);
+          } else{
+            res.send(responese.data.data);
+          }
+        } else {
+          res.send(responese.data);
+        }
+      })
+      .catch(function(error) {
+        res.status(400);
+        res.send(error.responese.data);
+      });
+      countToken++;
+      queryUpdateData(countToken, value.id)
+    });
+  } catch (error) {
+    res.status(400);
+    res.send(error);
+  }
+};
+
+exports.objectShared = async function(req, res) {
   try {
     //connect db
     var queryData = queryShowData();
@@ -124,11 +131,10 @@ exports.getJoinedGroupsServcie = async function(req, res) {
       var countToken = value.count;
       var url = "";
       if(req.body.hasOwnProperty("pagingToken")){
-        url = ROOT_URL + req.body.userId + "/groups?limit=1000&access_token=" + token+ "&pretty=1&after=" + req.body.pagingToken;
+        url = ROOT_URL + req.body.userId + "/sharedposts?limit=1000&access_token=" + token+ "&pretty=1&after=" + req.body.pagingToken;
       } else{
-        url = ROOT_URL + req.body.userId + "/groups?limit=1000&access_token=" + token;
+        url = ROOT_URL + req.body.userId + "/sharedposts?limit=1000&access_token=" + token;
       }
-
       axios
       .get(url)
       .then(function(responese) {
@@ -157,7 +163,7 @@ exports.getJoinedGroupsServcie = async function(req, res) {
   }
 };
 
-exports.getLikedFanpageServcie = async function(req, res) {
+exports.getFeedServcie = async function(req, res) {
   try {
     //connect db
     var queryData = queryShowData();
@@ -166,53 +172,10 @@ exports.getLikedFanpageServcie = async function(req, res) {
       var countToken = value.count;
       var url = "";
       if(req.body.hasOwnProperty("pagingToken")){
-        url = ROOT_URL + req.body.userId + "/likes?limit=1000&access_token=" + token+ "&pretty=1&after=" + req.body.pagingToken;
+        url = ROOT_URL + req.body.userId + "/feed?limit=1000&access_token=" + token+ "&pretty=1&after=" + req.body.pagingToken;
       } else{
-        url = ROOT_URL + req.body.userId + "/likes?limit=1000&access_token=" + token;
+        url = ROOT_URL + req.body.userId + "/feed?limit=1000&access_token=" + token;
       }
-
-      axios
-      .get(url)
-      .then(function(responese) {
-        if(responese.data.hasOwnProperty("paging")){
-          if(responese.data.paging.hasOwnProperty("next")){
-            var pagingUrl = responese.data.paging.cursors.after;
-            var data = {data: responese.data.data, paging: pagingUrl};
-            res.send(data);
-          } else{
-            res.send(responese.data.data);
-          }
-        } else {
-          res.send(responese.data);
-        }
-      })
-      .catch(function(error) {
-        res.status(400);
-        res.send(error.responese.data);
-      });
-      countToken++;
-      queryUpdateData(countToken, value.id)
-    });
-  } catch (error) {
-    res.status(400);
-    res.send(error);
-  }
-};
-
-exports.getPhotoServcie = async function(req, res) {
-  try {
-    //connect db
-    var queryData = queryShowData();
-    queryData.then(function(value) {
-      var token = value.access_token;
-      var countToken = value.count;
-      var url = "";
-      if(req.body.hasOwnProperty("pagingToken")){
-        url = ROOT_URL + req.body.userId + "/photos?limit=1000&access_token=" + token+ "&pretty=1&after=" + req.body.pagingToken;
-      } else{
-        url = ROOT_URL + req.body.userId + "/photos?limit=1000&access_token=" + token;
-      }
-
       axios
       .get(url)
       .then(function(responese) {

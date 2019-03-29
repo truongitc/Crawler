@@ -11,11 +11,6 @@ exports.profileFollowers = function(req, res){
   userServcie.getFollowersServcie(req, res);
 };
 
-//get user Followers + paging
-exports.profilePagingFollowers = function(req, res){
-  userServcie.getPagingFollowersServcie(req, res);
-};
-
 //get allbums
 exports.profileAllbums = function(req, res){
   userServcie.getAllbumsServcie(req, res);
